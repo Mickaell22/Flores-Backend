@@ -2,18 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 10
-
-[[services]]
-name = "backend"
-
-[services.build]
-buildCommand = "npm install && npx prisma generate"
-
-[services.deploy]
 startCommand = "npx prisma migrate deploy && npm start"
-
-[services.variables]
-NODE_ENV = "production"
-PORT = "5000"
