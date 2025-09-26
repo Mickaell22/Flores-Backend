@@ -1,0 +1,18 @@
+# Railway ignore file
+node_modules
+.env
+.env.local
+.env.backup*
+*.log
+.git
+scripts/local_data_export.json
+scripts/check-products.js
+scripts/export-data.js
+scripts/import-data.js
+scripts/fix-image-urls.js
+test-image.html
+crop_images.py
+tests/
+
+# Keep uploads directory for static files
+!uploads/

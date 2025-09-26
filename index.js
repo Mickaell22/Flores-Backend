@@ -24,16 +24,23 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy para obtener IP real
 app.set('trust proxy', 1);
 
-// Seguridad y middleware básico
+// Seguridad y middleware básico - DESACTIVAR CSP para permitir imágenes
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://flores-frontend-production.up.railway.app',
+    'https://flores-frontend.railway.internal',
+    'https://floreseternas.net'
+  ],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Servir archivos estáticos SIN restricciones de seguridad
@@ -51,7 +58,20 @@ app.use('/uploads', (req, res, next) => {
   res.removeHeader('Strict-Transport-Security');
 
   // Configurar headers CORS específicos para imágenes
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'https://flores-frontend-production.up.railway.app',
+    'https://flores-frontend.railway.internal',
+    'https://floreseternas.net',
+    'http://localhost:3000'
+  ];
+
+  const origin = req.get('origin');
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
@@ -107,6 +127,7 @@ app.get('/', (req, res) => {
 app.get('/test-image', (req, res) => {
     res.sendFile(path.join(__dirname, 'test-image.html'));
 });
+
 
 // API Routes con rate limiting específico
 app.use('/api', apiLimiter, routes);
