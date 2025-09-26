@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(CLIENTE)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile UserProfile?
+  orders  Order[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  firstName String
+  lastName  String
+  phone     String?
+  address   String?
+  city      String?
+  province  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  sku         String   @unique
+  isActive    Boolean  @default(true)
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category       @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model Customer {
+  id                 String             @id @default(cuid())
+  tipoIdentificacion TipoIdentificacion
+  identificacion     String             @unique
+  razonSocial        String
+  email              String?
+  telefono           String?
+  direccion          String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  orders Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  customerId       String
+  userId           String?
+  status           OrderStatus @default(PENDIENTE)
+  subtotal         Decimal     @db.Decimal(10, 2)
+  iva              Decimal     @db.Decimal(10, 2)
+  total            Decimal     @db.Decimal(10, 2)
+  paymentMethod    String?
+  shippingAddress  String?
+  notes            String?
+  whatsappSent     Boolean     @default(false)
+  whatsappMessage  String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+  invoice    Invoice?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Decimal  @db.Decimal(10, 2)
+  subtotal    Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Invoice {
+  id                   String        @id @default(cuid())
+  orderId              String        @unique
+  claveAcceso          String        @unique
+  numeroAutorizacion   String?
+  fechaEmision         DateTime      @default(now())
+  ambiente             String        @default("1")
+  tipoEmision          String        @default("1")
+  secuencial           String
+  establecimiento      String        @default("001")
+  puntoEmision         String        @default("001")
+  xmlContent           String?       @db.Text
+  xmlSigned            String?       @db.Text
+  xmlAuthorized        String?       @db.Text
+  estado               InvoiceStatus @default(PENDIENTE)
+  errorMessage         String?
+  fechaAutorizacion    DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("invoices")
+}
+
+model SriConfiguration {
+  id                String   @id @default(cuid())
+  ruc               String
+  razonSocial       String
+  nombreComercial   String?
+  ambiente          String   @default("1")
+  certificadoPath   String
+  certificadoClave  String
+  dirMatriz         String
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("sri_configurations")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  table     String
+  recordId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+enum Role {
+  ADMIN
+  VENDEDOR
+  CLIENTE
+}
+
+enum TipoIdentificacion {
+  RUC
+  CEDULA
+  PASAPORTE
+  CONSUMIDOR_FINAL
+  EXTERIOR
+}
+
+enum OrderStatus {
+  PENDIENTE
+  CONFIRMADO
+  EN_PROCESO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+enum InvoiceStatus {
+  PENDIENTE
+  ENVIADO
+  AUTORIZADO
+  NO_AUTORIZADO
+  ERROR
+}

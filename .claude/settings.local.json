@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ASUS/Desktop/Projecto SRI/**)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(pg_ctl:*)",
+      "Bash(where psql)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(winget install:*)",
+      "Bash(psql:*)",
+      "Bash(npx prisma:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

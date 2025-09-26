@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Image</title>
+</head>
+<body>
+    <h1>Test de Imagen Directa</h1>
+    <p>Imagen desde el mismo servidor:</p>
+    <img src="/uploads/products/1.jpg" alt="Test 1" style="width: 200px;">
+
+    <p>Imagen con URL completa:</p>
+    <img src="http://localhost:5000/uploads/products/1.jpg" alt="Test 2" style="width: 200px;">
+
+    <script>
+        console.log('Testing image load...');
+        const img1 = document.querySelector('img[alt="Test 1"]');
+        const img2 = document.querySelector('img[alt="Test 2"]');
+
+        img1.onload = () => console.log('Image 1 loaded successfully');
+        img1.onerror = () => console.log('Image 1 failed to load');
+
+        img2.onload = () => console.log('Image 2 loaded successfully');
+        img2.onerror = () => console.log('Image 2 failed to load');
+    </script>
+</body>
+</html>
