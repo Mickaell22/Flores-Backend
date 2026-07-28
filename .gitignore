@@ -10,3 +10,6 @@ yarn-error.log*
 .DS_Store
 *.log
 /generated/prisma
+
+# Configuracion local y variables de entorno reales
+.claude/
